@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VaststaR</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
+    <script src="/javascripts/jquery.min.js"></script>
+    <script src="/javascripts/popper.min.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+
+    <!---<link rel='stylesheet' href='/stylesheets/style.css' />-->
+  </head>
+  <body>
+    <% include header %>
+  
+    <div class="container">
+
+      <%
+        if (err===0){%>
+          <h2>Khong The Ket Noi Toi Server!</h2>
+
+      <%  } else{%>
+          <h2>Danh sach Tai Khoan</h2>
+          <p>Tong so: <%= data.length %></p>
+          <table class="table table-hover">
+            <thead class="thead-dark">
+              <tr>
+                <th>ID</th>
+                <th>USER</th>
+                <th>PASSWORD</th>
+                <th>AGE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%
+                for (i in data){%>
+                  <tr><%
+                  for (j in data[i]){%>
+                      <td><%= data[i][j] %></td>
+                      <%
+                  }%>
+
+                  <tr>
+
+                    <%
+                }
+              %>
+
+
+
+            </tbody>
+          </table>
+
+          <%
+
+        }
+
+      %>
+
+    </div>
+  </body>
+</html>
