@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VaststaR</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+
+    <script>
+      $(document).ready(function(){
+          $("#myform").submit(function(event){
+            //check pass and pass confirm_pass
+
+            /*
+              - Chưa kiểm tra từng giá trị rỗng từ phần tử
+            */
+
+            if ($("#user").val()&&$("#pass").val()&&$("#confirm_pass").val()&&$("#age").val()){
+              console.log("OK");
+              if ($("#pass").val()===$("#confirm_pass").val()){
+                console.log("AJAX");
+                //change form state to disable
+                $("fieldset").prop("disabled","disabled");
+                $.post("/resigter",
+                  {
+                    user:$("#user").val(),
+                    pass:$("#pass").val(),
+                    age:$("#age").val()
+                  }
+                ,function(data,status){
+                  if (data.flag==="true") $(".container").html("<h2>Đăng Kí Thành Công</h2>");
+                  else {
+                    $("fieldset").removeProp("disabled","disabled");
+                    $(".container").html("<h2>Error: Đăng Kí Không Thành Công!</h2>");
+                  }
+                }
+                ,"json");
+              }
+              else{
+                //passes do not match eachother
+                $("#pass").addClass("is-invalid");
+                if ($(".invalid-feedback").length>0){
+                  $(".invalid-feedback").val("Password Không Trùng Khớp!!");
+                }
+                else{
+                    $("#pass").parent().append('<div class="invalid-feedback">Password Không Trùng Khớp!!</div>');
+                }
+
+
+              }
+            }
+
+            event.preventDefault();
+          });
+      });
+    </script>
+
+  </head>
+  <body>
+    <% include header %>
+
+    <div class="container">
+
+       <div class="row content">
+
+          <!---MID CONTENT-->
+          <div class="col-sm-6 offset-sm-3">
+              <form id="myform">
+                <fieldset>
+                  <div class="form-group">
+                    <label for="user">User:</label>
+                    <%
+                      switch(err){
+                        case "001":
+                        %>
+                        <input type="text" class="form-control is-invalid" id="user" name="user">
+                        <div class="invalid-feedback">Tài Khoản Không Tồn Tại!</div>
+                        <%
+                          break;
+                        case "002":
+                        %>
+                        <input type="text" class="form-control is-invalid" id="user" name="user">
+                        <div class="invalid-feedback">Không Thể Kết Nối Server!</div>
+                        <%
+                          break;
+                        default:%>
+                        <input type="text" class="form-control" id="user" name="user">
+                        <%
+                      }
+                    %>
+                  </div>
+                  <div class="form-group">
+                    <label for="pass">Password:</label>
+                    <input type="password" class="form-control" id="pass" name="pass">
+                  </div>
+                  <div class="form-group">
+                    <label for="pass">Password Confirm:</label>
+                    <input type="password" class="form-control" id="confirm_pass" name="confirm_pass">
+                  </div>
+                  <div class="form-group">
+                    <label class="age">Age:</label>
+                    <input type="text" class="form-control" id="age" name="age">
+                  </div>
+                  <button type="submit" class="btn btn-dark float-sm-right">Resigter</button>
+                </fieldset>
+              </form>
+          </div>
+
+        </div>
+
+
+
+    </div>
+
+  </body>
+</html>

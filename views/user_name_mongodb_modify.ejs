@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VaststaR</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+
+    <script>
+      $(document).ready(function(){
+
+        //--Delete Function--
+        $(".btn_delete").click(function(){
+          let id = this.id;
+          alert($(".username_"+id).text()+":"+$(".pass_"+id).text()+":"+$(".age_"+id).text());
+          $.post("/delete",
+            {
+              user:$(".username_"+id).text(),
+            },
+            function(data,status){
+              if (data.flag==true) {
+                alert("Xóa Thành Công!");
+                $(".tr_"+id).remove();
+
+              }
+              else {
+                alert("Xóa Không Thành Công!");
+              }
+
+            },
+            "json");
+        });
+
+
+        //--Edit Function--
+        $(".btn_edit").click(function(){
+          let id = this.id;
+          let user_origin = $(".username_"+id).text();
+          let pass_origin = $(".pass_"+id).text();
+          let age_origin = $(".age_"+id).text();
+
+          console.log(id);
+          //hide btn_edit and btn_delete
+          $(this).hide();
+          $("#"+id+".btn_delete").hide();
+
+          //set all button exist this to disable
+          $(".btn_delete").not("#"+id).attr("disabled","disabled");
+          $(".btn_edit").not("#"+id).attr("disabled","disabled");
+
+
+
+
+          //add & show yes no button for edits function
+          $(this).parent().append('<button type="button" class="btn btn-success btn-sm btn_edit_yes">✔</button>');
+
+          $(this).parent().append('<button type="button" class="btn btn-danger btn-sm btn_edit_no">✖</button>');
+
+          //change <td> to textform for editing function
+          $(".username_"+id).text("");
+          $(".username_"+id).html('<input type="text" class="form-control" id="edit_user" name="user" value='+user_origin+'>');
+
+          $(".pass_"+id).text("");
+          $(".pass_"+id).html('<input type="text" class="form-control" id="edit_pass" name="pass" value='+pass_origin+'>');
+
+          $(".age_"+id).text("");
+          $(".age_"+id).html('<input type="text" class="form-control" id="edit_age" name="age" value='+age_origin+'>');
+
+          //--Check btn_edit_yes or no?
+          // if yes send server
+          // else restore orgin
+          $(".btn_edit_no").click(function(){
+            //alert("haha");
+            $(".username_"+id).text(user_origin);
+            $(".pass_"+id).text(pass_origin);
+            $(".age_"+id).text(age_origin);
+
+            $(".btn_delete").not("#"+id).removeAttr("disabled","disabled");
+            $(".btn_edit").not("#"+id).removeAttr("disabled","disabled");
+
+            $("#"+id+".btn_delete").fadeIn("fast");
+            $("#"+id+".btn_edit").fadeIn("fast");
+
+
+            $(".btn_edit_yes").remove();
+            this.remove();
+          });
+
+          $(".btn_edit_yes").click(function(){
+            $.post("/update",
+            {
+              user:$("#edit_user").val(),
+              pass:$("#edit_pass").val(),
+              age:$("#edit_age").val()
+            },
+            function(data,status){
+              if (data.flag==true) {
+                alert("Update Thành Công!");
+                $(".username_"+id).text($("#edit_user").val());
+                $(".pass_"+id).text($("#edit_pass").val());
+                $(".age_"+id).text($("#edit_age").val());
+
+                $(".btn_delete").not("#"+id).removeAttr("disabled","disabled");
+                $(".btn_edit").not("#"+id).removeAttr("disabled","disabled");
+
+                $("#"+id+".btn_delete").fadeIn("fast");
+                $("#"+id+".btn_edit").fadeIn("fast");
+
+
+                $(".btn_edit_no").remove();
+                $(".btn_edit_yes").remove();
+              }
+              else {
+                alert("Update Không Thành Công!");
+              }
+            },
+            "json");
+          });
+
+
+
+        });
+
+
+
+
+
+
+      });
+    </script>
+
+  </head>
+  <body>
+    <% include header %>
+
+    <div class="container">
+      <div class="row content text-left">
+        <div class="col-sm-12">
+          <% if (err===0){ %>
+              <h2>Khong The Ket Noi Toi Server!</h2>
+          <% } else { %>
+              <h2>Danh sach Tai Khoan</h2>
+              <p>Tong so: <%= data.length %></p>
+              <table class="table table-hover table-responsive">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>ID</th>
+                    <th>USER</th>
+                    <th>PASSWORD</th>
+                    <th>AGE</th>
+                    <th> </th>
+                    <th> </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for (i in data){ %>
+                      <tr class="tr_<%=i%>">
+                        <td><%=data[i]._id%></td>
+                        <td class="username_<%=i%>"><%=data[i].user%></td>
+                        <td class="pass_<%=i%>"><%=data[i].pass%></td>
+                        <td class="age_<%=i%>"><%=data[i].age%></td>
+                        <td><button type="button" class="btn btn-primary btn-sm btn_edit" id="<%=i%>">Edit</button></td>
+                        <td><button type="button" class="btn btn-danger btn-sm btn_delete" id="<%=i%>">✖</button></td>
+                      <tr>
+                        <% } %>
+                </tbody>
+              </table>
+              <% } %>
+            </div>
+      </div>
+    </div>
+  </body>
+</html>

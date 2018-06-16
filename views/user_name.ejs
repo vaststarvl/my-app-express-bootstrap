@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VaststaR</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
+    <script src="/javascripts/jquery.min.js"></script>
+    <script src="/javascripts/popper.min.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+
+    <!---<link rel='stylesheet' href='/stylesheets/style.css' />-->
+  </head>
+  <body>
+    <% include header %>
+    <h1>VaststaR</h1>
+    <p>Welcome to VaststaR</p>
+    <p>Ten: <%= name %></p>
+    <p>Age: <%= age %></p>
+
+    <div class="container">
+      <h2>TABLE NAME</h2>
+      <p>Desciption</p>
+      <table class="table table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><%= name %></td>
+            <td><%= age %></td>
+          </tr>
+
+        </tbody>
+      </table>
+
+    </div>
+  </body>
+</html>
