@@ -1,5 +1,5 @@
 var express = require('express');
-var account = require('../models/model_user2');
+var account = require('../models/model_user3');
 var router = express.Router();
 
 //var mongoose = require('mongoose');
@@ -101,19 +101,14 @@ router.get('/user_panel/', function(req, res, next) {
   console.log(req.session);
   if (req.session.flag===true){
     var myaccount = new account();
-      myaccount.findallAccounts()
-        .then(
-          (accounts)=>{
-              console.log(accounts);
-              res.render('user_name_mongodb',{err:1,data:accounts});
-
-          }
-
-        ).catch(err=>{
-          console.log(err);
+      myaccount.findallAccounts(function(result){
+        if (!result){
           res.render('user_name_mongodb',{err:0,data:undefined});
-        });
-
+        }
+        else{
+          res.render('user_name_mongodb',{err:1,data:result});
+        }
+      });
 
   }
   else res.send("FAIL!");
@@ -152,6 +147,8 @@ router.post('/login',function(req, res, next){
       pass:req.body.pass
     });
 
+    console.log(myaccount.user+":"+myaccount.pass);
+
 
 
 /*  try{
@@ -167,21 +164,26 @@ router.post('/login',function(req, res, next){
       res.redirect("/user_login?err="+err);
     }*/
 
-  myaccount.findAccount(function(err,result){
-    if (err) {
-      console.log(err);
-      res.redirect("/user_login?err=002");
-      }
-    else{
-      console.log("server:"+result);
-      if (result) {
-        console.log("server:"+result);
-        req.session.flag = true;
-        res.redirect("/user_panel/");
+  myaccount.findAccount(function(result){
+    switch(result){
+      case "err=001":
+          res.redirect("/user_login?err=001");
+          break;
+      case "err=002":
+          res.redirect("/user_login?err=002");
+          break;
+      default:
+        {
+          console.log("server:"+result);
+          req.session.flag = true;
+          res.redirect("/user_panel/");
+          break;
         }
-      else res.redirect("/user_login?err=001");
-    }
-  });
+
+      }
+
+
+    });
 
 });
 
@@ -228,55 +230,31 @@ router.post("/resigter",function(req,res,next){
     }
   });*/
 
-    myaccount.findUser()
-      .then((result)=>{
-        if (!result){
-          myaccount.addAccount()
-           .then((result)=>{
-             if (result){
-               console.log(result);
-               res.setHeader("Content-Type","application/json");
-               res.send(JSON.stringify({flag:"true"}));
-             }
-             else{
-               res.setHeader("Content-Type","application/json");
-               res.send(JSON.stringify({flag:"false"}));
-             }
-           })
-           .catch((err)=>{
-             console.log(err);
-             res.setHeader("Content-Type","application/json");
-             res.send(JSON.stringify({flag:"false"}));
-           });
-        }
-        else{
-          console.log("Tài Khoản đã được sử dụng!");
-          res.setHeader("Content-Type","application/json");
-          res.send(JSON.stringify({flag:"false"}));
-        }
-      })
-      .catch((err)=>{
-          console.log(err);
-          res.setHeader("Content-Type","application/json");
-          res.send(JSON.stringify({flag:"false"}));
-        });
 
+  myaccount.addAccount(function(result){
+    if (!result){
+      res.setHeader("Content-Type","application/json");
+      res.send(JSON.stringify({flag:"false"}));
+    }
+    else{
+      console.log(result);
+      res.setHeader("Content-Type","application/json");
+      res.send(JSON.stringify({flag:"true"}));
+    }
+  });
 
 });
 
 router.get("/user_modify",function(req,res,next){
   var myaccount = new account();
-    myaccount.findallAccounts()
-      .then(
-        (accounts)=>{
-            console.log(accounts);
-            res.render('user_name_mongodb_modify',{err:1,data:accounts});
-        }
-
-      ).catch(err=>{
-        console.log(err);
-        res.render('user_name_mongodb_modify',{err:0,data:undefined});
-      });
+  myaccount.findallAccounts(function(result){
+    if (!result){
+      res.render('user_name_mongodb_modify',{err:0,data:undefined});
+    }
+    else{
+      res.render('user_name_mongodb_modify',{err:1,data:result});
+    }
+  });
 });
 
 router.post("/delete",function(req,res,next){
@@ -286,25 +264,18 @@ router.post("/delete",function(req,res,next){
     pass:req.body.pass
   });
 
-  myaccount.deleteAccount()
-    .then((result)=>{
-      if (result.n==0){
-        console.log("XOA KHONG THANH CONG!");
-        res.setHeader("Content-Type","application/json");
-        res.send(JSON.stringify({flag:false}));
-      }
-      else{
-        console.log("XOA THANH CONG");
-        res.setHeader("Content-Type","application/json");
-        res.send(JSON.stringify({flag:true}));
-      }
-
-    })
-    .catch(err=>{
-          console.log(err);
-          res.setHeader("Content-Type","application/json");
-          res.send(JSON.stringify({flag:false}));
-    });
+  myaccount.deleteAccount(function(result){
+    if (!result){
+      console.log("XOA KHONG THANH CONG!");
+      res.setHeader("Content-Type","application/json");
+      res.send(JSON.stringify({flag:false}));
+    }
+    else{
+      console.log("XOA THANH CONG");
+      res.setHeader("Content-Type","application/json");
+      res.send(JSON.stringify({flag:true}));
+    }
+  });
 
 });
 
@@ -321,25 +292,18 @@ router.post("/update",function(req,res,next){
   console.log(myaccount.pass);
   console.log(myaccount.age);
 
-  myaccount.updateAccount()
-    .then((result)=>{
-      if (result.modifiedCount==0){
-        console.log("UPADTE KHONG THANH CONG!");
-        res.setHeader("Content-Type","application/json");
-        res.send(JSON.stringify({flag:false}));
-      }
-      else{
-        console.log("UPDATE THANH CONG");
-        res.setHeader("Content-Type","application/json");
-        res.send(JSON.stringify({flag:true}));
-      }
-
-    })
-    .catch(err=>{
-          console.log(err);
-          res.setHeader("Content-Type","application/json");
-          res.send(JSON.stringify({flag:false}));
-    });
+  myaccount.updateAccount(function(result){
+    if (!result){
+      console.log("UPDATE KHONG THANH CONG!");
+      res.setHeader("Content-Type","application/json");
+      res.send(JSON.stringify({flag:false}));
+    }
+    else{
+      console.log("UPDATE THANH CONG!");
+      res.setHeader("Content-Type","application/json");
+      res.send(JSON.stringify({flag:true}));
+    }
+  });
 
 });
 
