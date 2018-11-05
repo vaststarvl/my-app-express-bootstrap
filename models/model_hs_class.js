@@ -5,21 +5,15 @@ const uri = 'mongodb+srv://admin:admin@vaststar-v7yxs.mongodb.net/test';
 //mongoose.connect(uri);
 var Schema = mongoose.Schema;
 
-var accountSchema = new Schema({
-      user:String,
-      pass:String,
-      age:String
-    },{collection:'myaccount'});
+var hs_class_Schema = new Schema({
+      name:String,
+      str_id:String,
+    },{collection:'hs_class'});
 
 
-accountSchema.methods.entertoServer = function(cb){
-  return mongoose.connect(uri,cb);
-};
 
-accountSchema.methods.findallAccounts = function(cb){
-  var model  = this.model('Account');
-  console.log(this.user);
-
+hs_class_Schema.methods.findall = function(cb){
+  var model  = this.model('hs_Class');
     mongoose.connect(uri,function(err,db){
          if (err){
            console.log("ERROR FINDALL"+err);
@@ -48,7 +42,80 @@ accountSchema.methods.findallAccounts = function(cb){
     });
 };
 
+hs_class_Schema.methods.findclass = function(cb){
+  var model  = this.model('hs_Class');
+  const str_id = this.str_id;
+    mongoose.connect(uri,function(err,db){
+         if (err){
+           console.log("ERROR FINDALL"+err);
+           cb(null);
+         }
+         else{
+           async function processdata(cb){
+             try {
+               console.log("_____________KETNOI_________FIND_ONE");
+               console.log("Connect:"+mongoose.connection.readyState);
+               //var data = await model.find({});
+               var data = await model.aggregate([
+                 {
+                   $match:{
+                     str_id:str_id,
+                   }
+                 },
+                 {
+                   $lookup:{
+                     from:"hs_student",
+                     localField:"str_id",
+                     foreignField:"class_id",
+                     as:"student"
+                   }
+                 },
+                 {
+                   $lookup:{
+                     from:"hs_employee",
+                     localField:"str_id",
+                     foreignField:"class_id",
+                     as:"teacher"
+                   }
+                 },
+                 {
+                   $project:{
+                     name:1,
+                     str_id:1,
+                     "student.firstname":1,
+                     "student.lastname":1,
+                     "student.address":1,
+                     "student.male":1,
+                     "student.birthday":1,
+                     "student.str_id":1,
+                     "teacher.firstname":1,
+                     "teacher.lastname":1,
+                     "teacher.birthday":1,
+                     "teacher.str_id":1,
+                   }
+                 }
 
+               ]);
+
+               console.log(data);
+               db.close();
+               console.log("Connect:"+mongoose.connection.readyState);
+               if ((data!==null)&&(data.length>0)) cb(data);
+               else cb(null);
+             }
+             catch(err){
+               console.log(err);
+               db.close();
+               cb(null);
+             }
+           };
+           processdata(cb);
+      }
+    });
+};
+
+
+/*
 accountSchema.methods.findAccount = function(cb){
   var model  = this.model('Account');
   var user = this.user;
@@ -253,8 +320,8 @@ accountSchema.methods.updateAccount = function(cb){
            processdata(cb);
       }
     });
-};
+};*/
 
-var Account=mongoose.model('Account',accountSchema);
+var hs_Class=mongoose.model('hs_Class',hs_class_Schema);
 
-module.exports=Account;
+module.exports=hs_Class;

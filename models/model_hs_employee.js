@@ -5,21 +5,27 @@ const uri = 'mongodb+srv://admin:admin@vaststar-v7yxs.mongodb.net/test';
 //mongoose.connect(uri);
 var Schema = mongoose.Schema;
 
-var accountSchema = new Schema({
-      user:String,
-      pass:String,
-      age:String
-    },{collection:'myaccount'});
+var hs_employee_Schema = new Schema({
+      firstname:String,
+      lastname:String,
+      address:String,
+      birthday:Date,
+      dayjoining:Date,
+      male:Boolean,
+      cmnd:String,
+      phonenumber:Array,
+      class_id:String,
+      he_so_luong:String,
+      phu_cap:String,
+      chuc_vu:String,
+      parent_id:String,
+      str_id:String,
+    },{collection:'hs_employee'});
 
 
-accountSchema.methods.entertoServer = function(cb){
-  return mongoose.connect(uri,cb);
-};
 
-accountSchema.methods.findallAccounts = function(cb){
-  var model  = this.model('Account');
-  console.log(this.user);
-
+hs_employee_Schema.methods.findall = function(cb){
+  var model  = this.model('hs_Employee');
     mongoose.connect(uri,function(err,db){
          if (err){
            console.log("ERROR FINDALL"+err);
@@ -30,7 +36,48 @@ accountSchema.methods.findallAccounts = function(cb){
              try {
                console.log("_____________KETNOI_________FIND_ALL");
                console.log("Connect:"+mongoose.connection.readyState);
-               var data = await model.find({});
+               //var data = await model.find({});
+               var data = await model.aggregate([
+                 {
+                   $project:{
+                     _id:1,
+                     firstname:1,
+                     lastname:1,
+                     birthday:1,
+                     dayjoining:1,
+                     male:1,
+                     class_id:1,
+                     he_so_luong:1,
+                     phu_cap:1,
+                     chuc_vu:1,
+                     str_id:1,
+                   }
+                 },
+                 {
+                   $lookup:{
+                     from:"hs_class",
+                     localField:"class_id",
+                     foreignField:"str_id",
+                     as:"result",
+                   }
+                 },
+                 {
+                   $project:{
+                     _id:1,
+                     firstname:1,
+                     lastname:1,
+                     birthday:1,
+                     dayjoining:1,
+                     male:1,
+                     class_id:1,
+                     class_name:{$arrayElemAt:["$result.name",0]},
+                     he_so_luong:1,
+                     phu_cap:1,
+                     chuc_vu:1,
+                     str_id:1,
+                   }
+                 }
+               ]);
                console.log(data);
                db.close();
                console.log("Connect:"+mongoose.connection.readyState);
@@ -48,7 +95,133 @@ accountSchema.methods.findallAccounts = function(cb){
     });
 };
 
+hs_employee_Schema.methods.findemployee = function(cb){
+  var model  = this.model('hs_Employee');
+  const str_id = this.str_id;
+    mongoose.connect(uri,function(err,db){
+         if (err){
+           console.log("ERROR FINDALL"+err);
+           cb(null);
+         }
+         else{
+           async function processdata(cb){
+             try {
+               console.log("_____________KETNOI_________FIND_ALL");
+               console.log("Connect:"+mongoose.connection.readyState);
+               //var data = await model.find({});
+               var data = await model.aggregate([
+                 {
+                   $match:{
+                     str_id:str_id,
+                   }
+                 },
+                 {
+                   $lookup:{
+                     from:"hs_map_parent_student",
+                     localField:"parent_id",
+                     foreignField:"parent_id",
+                     as:"result",
+                   }
+                 },
+                 {
+                   $project:{
+                     firstname:1,
+                     lastname:1,
+                     address:1,
+                     birthday:1,
+                     dayjoining:1,
+                     male:1,
+                     cmnd:1,
+                     phonenumber:1,
+                     class_id:1,
+                     he_so_luong:1,
+                     phu_cap:1,
+                     chuc_vu:1,
+                     parent_id:1,
+                     str_id:1,
+                     student:"$result.student_id",
+                   }
+                 },
+                 {
+                   $lookup:{
+                     from:"hs_class",
+                     localField:"class_id",
+                     foreignField:"str_id",
+                     as:"result",
+                   }
+                 },
+                 {
+                   $project:{
+                     firstname:1,
+                     lastname:1,
+                     address:1,
+                     birthday:1,
+                     dayjoining:1,
+                     male:1,
+                     cmnd:1,
+                     phonenumber:1,
+                     class_id:1,
+                     class_name:{$arrayElemAt:["$result.name",0]},
+                     he_so_luong:1,
+                     phu_cap:1,
+                     chuc_vu:1,
+                     parent_id:1,
+                     str_id:1,
+                     student:1,
+                   }
+                 },
+                 {
+                   $lookup:{
+                     from:"hs_student",
+                     localField:"student",
+                     foreignField:"str_id",
+                     as:"student",
+                   }
+                 },
+                 {
+                   $project:{
+                     firstname:1,
+                     lastname:1,
+                     address:1,
+                     birthday:1,
+                     dayjoining:1,
+                     male:1,
+                     cmnd:1,
+                     phonenumber:1,
+                     class_id:1,
+                     class_name:1,
+                     he_so_luong:1,
+                     phu_cap:1,
+                     chuc_vu:1,
+                     parent_id:1,
+                     str_id:1,
+                     "student.firstname":1,
+                     "student.lastname":1,
+                     "student.str_id":1,
+                   }
+                 }
 
+               ]);
+
+               console.log(data);
+               db.close();
+               console.log("Connect:"+mongoose.connection.readyState);
+               if ((data!==null)&&(data.length>0)) cb(data);
+               else cb(null);
+             }
+             catch(err){
+               console.log(err);
+               db.close();
+               cb(null);
+             }
+           };
+           processdata(cb);
+      }
+    });
+};
+
+
+/*
 accountSchema.methods.findAccount = function(cb){
   var model  = this.model('Account');
   var user = this.user;
@@ -253,8 +426,8 @@ accountSchema.methods.updateAccount = function(cb){
            processdata(cb);
       }
     });
-};
+};*/
 
-var Account=mongoose.model('Account',accountSchema);
+var hs_Employee=mongoose.model('hs_Employee',hs_employee_Schema);
 
-module.exports=Account;
+module.exports=hs_Employee;

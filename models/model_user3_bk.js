@@ -4,6 +4,8 @@ mongoose.set("bufferCommands",false);
 const uri = 'mongodb+srv://admin:admin@vaststar-v7yxs.mongodb.net/test';
 //mongoose.connect(uri);
 var Schema = mongoose.Schema;
+   /*var db = mongoose.connection;
+   db.on('error',console.error.bind(console,'connection error:'));*/
 
 var accountSchema = new Schema({
       user:String,
@@ -54,6 +56,33 @@ accountSchema.methods.findAccount = function(cb){
   var user = this.user;
   var pass = this.pass;
   console.log(this.user);
+/*  mongoose.connect(uri,function(err,db){
+     if (err) cb(null);
+     model.findone({user:this.user},function(err,account){
+       if (err) cb(null);
+       cb(account);
+       db.close();
+     });
+    }).catch((err)=>{
+      cb(null);
+    });*/
+
+/*  mongoose.connect(uri)
+    .then((db)=>{
+        model.findOne({user:this.user})
+          .then(account=>{
+            db.close();
+            return (account);
+          }).catch(err=>{console.log(err); db.close(); return null;});
+    })
+    .catch(err=>{
+      console.log(err);
+      return null;
+    });*/
+
+    //************ASYNC***************/
+
+
 
     mongoose.connect(uri,function(err,db){
          if (err){
@@ -61,7 +90,42 @@ accountSchema.methods.findAccount = function(cb){
            cb("err=002");
          }
          else{
-          async function processdata(cb){
+        /*   console.log("_____________KETNOI_________FIND_ONE");
+           console.log("Connect:"+mongoose.connection.readyState);
+           async.waterfall([
+             function(callback){
+               model.findOne({user:user,pass:pass},function(err,account){
+                 if (err) {
+                   console.log("QUERY"+err);
+                   db.close();
+                   callback(err);
+                 }
+                 else{
+                    console.log("DATA FIND"+account);
+                    db.close();
+                    console.log("Connect:"+mongoose.connection.readyState);
+                    callback(null,account);
+                 }
+               });
+             },
+             function(account,callback){
+               console.log("DATA"+account);
+               if (account!==null) cb(account);
+               else cb("err=001");
+             }
+          ],function(err,result){
+            if (err) {
+              cb("err=002");
+              console.log(err);
+            }
+            else {
+              console.log("Done!");
+              console.log("Connect:"+mongoose.connection.readyState);
+            };
+          }
+        );*/
+
+        async function processdata(cb){
           try {
             console.log("_____________KETNOI_________FIND_ONE");
             console.log("Connect:"+mongoose.connection.readyState);
@@ -255,6 +319,15 @@ accountSchema.methods.updateAccount = function(cb){
     });
 };
 
+
+
 var Account=mongoose.model('Account',accountSchema);
+
+/*Account.findallAccounts(function(err,accounts){
+  if(err) return 0;
+  return accounts;
+});*/
+
+
 
 module.exports=Account;

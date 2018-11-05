@@ -92,6 +92,7 @@ accountSchema.methods.updateAccount = function(cb){
 
 var Account=mongoose.model('Account',accountSchema);
 
+
 /*Account.findallAccounts(function(err,accounts){
   if(err) return 0;
   return accounts;
