@@ -7,6 +7,8 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var apiRouter = require('./routes/api');
+var viewRouter = require('./routes/view');
 
 var app = express();
 
@@ -30,6 +32,9 @@ app.use(session({
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/hoasen/api', apiRouter);
+app.use('/hoasen/view', viewRouter);
+
 
 
 
